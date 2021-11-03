@@ -1,0 +1,22 @@
+- name: Install Useful Tools
+  hosts: localhost
+  vars:
+    - os_file: "../vars/{{ ansible_facts['os_family'] | lower }}.yml"
+    - dependencies: "{{ lookup('file', os_file).splitlines() }}"
+  tasks:
+    - name: Add APT Repositories
+      apt_repository:
+        repo: "{{ item }}"
+        state: present
+      loop:
+        - "ppa:regolith-linux/release"
+        - "ppa:system76-dev/stable"
+      become: True
+      when: ansible_facts['os_family'] == 'Debian'
+
+    - name: Install Dependencies
+      package:
+        name:
+          - "{{ item }}"
+      become: True
+      loop: "{{ dependencies }}"
